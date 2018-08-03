@@ -11,6 +11,9 @@ module FriendlyId
     # The modules in use
     attr_reader :modules
 
+    # The default I18n.locale or the overrided locale
+    attr_reader :locale
+
     # The model class that this configuration belongs to.
     # @return ActiveRecord::Base
     attr_accessor :model_class
@@ -27,10 +30,25 @@ module FriendlyId
     def initialize(model_class, values = nil)
       @model_class    = model_class
       @defaults       = {}
+      @locale         = I18n.locale
       @modules        = []
       @finder_methods = FriendlyId::FinderMethods
       self.routes = :friendly
       set values
+    end
+
+    # Options to override the default locale value used on SimpleI18n
+    #
+    # @example
+    #   class Book < ActiveRecord::Base
+    #     extend FriendlyId
+    #     friendly_id :name, use: :simple_i18n, locale: :pt
+    #     or
+    #     friendly_id :name, use: :simple_i18n, locale: ->(locale) { locale }
+    #   end
+    #
+    def locale=(value)
+      @locale = value.is_a?(Proc) ? value.call(I18n.locale) : value
     end
 
     # Lets you specify the addon modules to use with FriendlyId.
